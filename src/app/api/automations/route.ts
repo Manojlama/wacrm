@@ -8,6 +8,10 @@ import {
   validateStepsForActivation,
   validateTriggerForActivation,
 } from '@/lib/automations/validate'
+import {
+  canCreateAutomation,
+  incrementUsage,
+} from '@/lib/subscriptions/entitlements'
 
 export async function GET() {
   const supabase = await createClient()
@@ -54,6 +58,15 @@ export async function POST(request: Request) {
       { error: 'Your profile is not linked to an account.' },
       { status: 403 },
     )
+  }
+
+  // Enforce the plan's automation cap before creating (and record the
+  // increment after). Aborting here is safe: nothing has been inserted
+  // yet and no increment has been recorded.
+  try {
+    await canCreateAutomation(accountId)
+  } catch (err) {
+    return toErrorResponse(err)
   }
 
   const body = await request.json().catch(() => null)
@@ -130,6 +143,8 @@ export async function POST(request: Request) {
     const err = await insertSteps(automation.id, effectiveSteps)
     if (err) return NextResponse.json({ error: err }, { status: 500 })
   }
+
+  await incrementUsage(accountId, 'automations')
 
   return NextResponse.json({ automation }, { status: 201 })
 }

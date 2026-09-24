@@ -92,6 +92,11 @@ export default function FlowsPage() {
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  // Styled delete confirmation (replaces the old window.confirm, which
+  // wasn't themeable and read as a jarring regression next to the
+  // dialogs on the automations/contacts/broadcasts surfaces).
+  const [deleteTarget, setDeleteTarget] = useState<FlowRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -178,16 +183,25 @@ export default function FlowsPage() {
   }
 
   async function handleDelete(flow: FlowRow) {
-    const yes = window.confirm(t("deleteConfirm", { name: flow.name }));
-    if (!yes) return;
+    setDeleteTarget(flow);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/flows/${flow.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/flows/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
       if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
-      setFlows((prev) => prev.filter((f) => f.id !== flow.id));
+      setFlows((prev) => prev.filter((f) => f.id !== deleteTarget.id));
       toast.success(t("deleteSuccess"));
+      setDeleteTarget(null);
     } catch (err) {
       console.error(err);
       toast.error(t("deleteError"));
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -319,6 +333,37 @@ export default function FlowsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
+        <DialogContent className="sm:max-w-md bg-popover text-popover-foreground">
+          <DialogHeader>
+            <DialogTitle>{t("deleteTitle")}</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              {t("deleteDesc", { name: deleteTarget?.name ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              {t("cancel")}
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleting}>
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              {t("delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -375,7 +420,7 @@ function FlowCard({
         ? Archive
         : PauseCircle;
   return (
-    <div className="flex flex-col rounded-lg border border-border bg-card p-4 transition-colors hover:border-border">
+    <div className="flex flex-col rounded-lg border border-border glass-card p-4 transition-colors hover:border-border">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <Workflow className="h-4 w-4 shrink-0 text-primary" />

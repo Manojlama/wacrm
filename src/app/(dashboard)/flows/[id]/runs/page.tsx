@@ -234,7 +234,7 @@ function RunCard({
       })
     : null;
   return (
-    <div className="rounded-lg border border-border bg-card">
+    <div className="rounded-lg border border-border glass-card">
       <button
         type="button"
         onClick={onToggle}
@@ -323,15 +323,15 @@ const EVENT_COLOR: Record<string, string> = {
 function EventLine({ ev }: { ev: EventRow }) {
   const cls = EVENT_COLOR[ev.event_type] ?? "text-muted-foreground";
   return (
-    <div className="flex items-start gap-2 rounded-md px-2 py-1 text-xs">
-      <span className="w-32 shrink-0 text-[10px] text-muted-foreground">
+    <div className="flex items-start gap-2 overflow-x-auto rounded-md px-2 py-1 text-xs">
+      <span className="w-24 shrink-0 text-[10px] text-muted-foreground sm:w-32">
         {format(new Date(ev.created_at), "HH:mm:ss")}
       </span>
-      <span className={cn("w-32 shrink-0 font-mono text-[10px]", cls)}>
+      <span className={cn("w-24 shrink-0 font-mono text-[10px] sm:w-32", cls)}>
         {ev.event_type}
       </span>
       {ev.node_key && (
-        <code className="shrink-0 rounded bg-muted px-1 py-0.5 text-[10px] text-muted-foreground">
+        <code className="shrink-0 truncate rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
           {ev.node_key}
         </code>
       )}

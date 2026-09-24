@@ -9,6 +9,7 @@ import {
   UserPlus,
   DollarSign,
   Send,
+  RefreshCw,
 } from 'lucide-react'
 
 import {
@@ -44,6 +45,14 @@ export default function DashboardPage() {
   const [metrics, setMetrics] = useState<MetricsBundle | null>(null)
   const [metricsLoading, setMetricsLoading] = useState(true)
 
+  // Flipped if any of the parallel loads below fails. Renders a small
+  // error banner with a retry so a transient DB / network hiccup can't
+  // masquerade as a forever-spinning skeleton.
+  const [loadFailed, setLoadFailed] = useState(false)
+  // Bumped by the banner's retry button, the tab-refocus listener and
+  // the periodic refresh interval to re-run loadAll.
+  const [refreshKey, setRefreshKey] = useState(0)
+
   const [range, setRange] = useState<RangeDays>(30)
   // Keep a cache per range so switching tabs doesn't re-fetch what we
   // already have. Ranges the user hasn't opened yet stay null and
@@ -66,28 +75,44 @@ export default function DashboardPage() {
 
   const loadAll = useCallback(() => {
     const db = createClient()
+    // Clear the banner asynchronously (not synchronously inside the
+    // effect that calls loadAll) so the reset isn't a sync setState-in-
+    // effect — React flags those as cascading render sources.
+    Promise.resolve().then(() => setLoadFailed(false))
 
     // Kick everything off in parallel. Each block has its own
     // setState + finally so a slow query doesn't hold up faster
     // sections — each widget shows its own skeleton independently.
     void loadMetrics(db)
       .then((m) => setMetrics(m))
-      .catch((err) => console.error('[dashboard] metrics failed:', err))
+      .catch((err) => {
+        console.error('[dashboard] metrics failed:', err)
+        setLoadFailed(true)
+      })
       .finally(() => setMetricsLoading(false))
 
     void loadConversationsSeries(db, 30)
       .then((s) => setSeries((prev) => ({ ...prev, 30: s })))
-      .catch((err) => console.error('[dashboard] series failed:', err))
+      .catch((err) => {
+        console.error('[dashboard] series failed:', err)
+        setLoadFailed(true)
+      })
       .finally(() => setSeriesLoading(false))
 
     void loadPipelineDonut(db)
       .then((p) => setPipeline(p))
-      .catch((err) => console.error('[dashboard] pipeline failed:', err))
+      .catch((err) => {
+        console.error('[dashboard] pipeline failed:', err)
+        setLoadFailed(true)
+      })
       .finally(() => setPipelineLoading(false))
 
     void loadResponseTime(db)
       .then((r) => setResponseTime(r))
-      .catch((err) => console.error('[dashboard] response time failed:', err))
+      .catch((err) => {
+        console.error('[dashboard] response time failed:', err)
+        setLoadFailed(true)
+      })
       .finally(() => setResponseTimeLoading(false))
 
     // Fetch up to 50 so the biggest page-size option in the feed
@@ -95,13 +120,36 @@ export default function DashboardPage() {
     // a pure client-side slice with no extra round trip.
     void loadActivity(db, 50)
       .then((a) => setActivity(a))
-      .catch((err) => console.error('[dashboard] activity failed:', err))
+      .catch((err) => {
+        console.error('[dashboard] activity failed:', err)
+        setLoadFailed(true)
+      })
       .finally(() => setActivityLoading(false))
   }, [])
 
   useEffect(() => {
     loadAll()
-  }, [loadAll])
+  }, [loadAll, refreshKey])
+
+  // Keep the dashboard fresh: refetch when the tab regains focus (the
+  // surest signal that analytics may have gone stale while hidden) and
+  // on a modest 60s cadence so a long-lived tab doesn't freeze at the
+  // moment it was opened. Range caches cover the per-range series data.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshKey((n) => n + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    const interval = window.setInterval(() => {
+      setRefreshKey((n) => n + 1)
+    }, 60_000)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.clearInterval(interval)
+    }
+  }, [])
 
   // Range switch handler — kept in an event callback (not an effect)
   // so the setState calls stay out of the react-hooks/set-state-in-effect
@@ -130,6 +178,23 @@ export default function DashboardPage() {
           {t('description')}
         </p>
       </div>
+
+      {/* Load-failure banner — appears only when one of the parallel
+          widget loads above errored. Stays on top so whatever DID load
+          keeps rendering below it. */}
+      {loadFailed && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3">
+          <p className="text-sm text-destructive">{t('loadFailed')}</p>
+          <button
+            type="button"
+            onClick={() => setRefreshKey((n) => n + 1)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-destructive/40 px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+          >
+            <RefreshCw className="h-3 w-3" />
+            {t('retry')}
+          </button>
+        </div>
+      )}
 
       {/* Metric cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

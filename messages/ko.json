@@ -38,7 +38,8 @@
     "defaultAvatar": "아바타",
     "menuProfile": "프로필",
     "menuSettings": "설정",
-    "menuSignOut": "로그아웃"
+    "menuSignOut": "로그아웃",
+    "billing": "빌링 & 요금제"
   },
   "Header": {
     "dashboard": "대시보드",
@@ -55,10 +56,23 @@
     "defaultAvatar": "아바타",
     "menuProfile": "프로필",
     "menuSettings": "설정",
-    "menuSignOut": "로그아웃"
+    "menuSignOut": "로그아웃",
+    "unreadMessages": "읽지 않은 메시지 {count}개",
+    "unreadNotifications": "읽지 않은 알림 {count}개"
   },
   "ModeToggle": {
     "switchMode": "{mode} 모드로 전환"
+  },
+  "Notifications": {
+    "title": "알림",
+    "description": "팀원이 나에게 배정한 대화가 여기에 표시됩니다.",
+    "markAllRead": "모두 읽음 처리",
+    "noNotifications": "알림이 없습니다",
+    "noNotificationsHint": "누군가 당신에게 대화를 배정하면 여기에 알림이 표시됩니다.",
+    "retry": "다시 시도",
+    "markReadError": "알림을 읽음 처리하지 못했습니다",
+    "markAllError": "모두 읽음 처리하지 못했습니다",
+    "unread": "읽지 않음"
   },
   "AccountAccess": {
     "unlinkedTitle": "이 사용자가 계정에 연결되어 있지 않음",
@@ -78,7 +92,9 @@
       "newTodayVsYesterday": "어제 대비 신규",
       "vsYesterday": "어제 대비",
       "openDeals": "진행 중인 딜 {count}건",
-      "noChange": "변동 없음 {suffix}"
+      "noChange": "변동 없음 {suffix}",
+      "loadFailed": "일부 분석 데이터를 불러오지 못했습니다.",
+      "retry": "다시 시도"
     },
     "quickActions": {
       "newContact": "새 연락처",
@@ -147,7 +163,14 @@
       "company": "회사",
       "allCompanies": "전체 회사",
       "clearAll": "모두 지우기",
+      "clearFilters": "필터 지우기",
+      "live": "실시간",
+      "reconnecting": "재연결 중…",
+      "loadFailed": "대화를 불러오지 못했습니다",
+      "retry": "다시 시도",
       "noConversations": "대화를 찾을 수 없습니다",
+      "noConversationsYet": "아직 대화가 없습니다",
+      "noConversationsMatch": "검색어나 필터에 맞는 대화가 없습니다",
       "noMessagesYet": "아직 메시지가 없습니다",
       "unknown": "알 수 없음"
     },
@@ -168,6 +191,8 @@
       "unassign": "담당자 해제",
       "noTeammates": "지정 가능한 팀원이 없습니다",
       "me": " (나)",
+      "loadFailed": "메시지를 불러오지 못했습니다",
+      "retry": "다시 시도",
       "noMessagesYet": "아직 메시지가 없습니다",
       "sendTemplateHint": "템플릿을 보내 대화를 시작하세요",
       "selectConversation": "대화를 선택하세요",
@@ -341,7 +366,9 @@
       "toastFailedDelete": "연락처를 삭제하지 못했습니다",
       "toastDeleted": "연락처가 삭제되었습니다",
       "toastBulkFailedDelete": "연락처를 삭제하지 못했습니다",
-      "toastBulkDeleted": "연락처 {count}개가 삭제되었습니다"
+      "toastBulkDeleted": "연락처 {count}개가 삭제되었습니다",
+      "loadFailed": "연락처를 불러오지 못했습니다",
+      "retry": "다시 시도"
     },
     "form": {
       "addTitle": "연락처 추가",
@@ -1027,6 +1054,8 @@
       "createError": "플로우를 만들 수 없습니다.",
       "cloneError": "복제 실패",
       "deleteConfirm": "\"{name}\"을(를) 삭제하시겠습니까? 실행 중인 세션은 즉시 종료됩니다.",
+      "deleteTitle": "플로우 삭제",
+      "deleteDesc": "\"{name}\"을(를) 삭제하시겠습니까? 실행 중인 세션은 즉시 종료됩니다.",
       "deleteSuccess": "플로우가 삭제되었습니다.",
       "deleteError": "플로우를 삭제할 수 없습니다.",
       "emptyTitle": "아직 플로우가 없습니다",
@@ -1369,13 +1398,11 @@
       "deleteLocallyAria": "로컬에서 템플릿 삭제",
       "deleteMetaLocallyTitle": "Meta와 로컬에서 삭제",
       "deleteLocallyTitle": "로컬에서 삭제",
-
       "dialogEditTitle": "메시지 템플릿 수정",
       "dialogNewTitle": "새 메시지 템플릿",
       "dialogEditDesc": "변경 사항을 저장해 Meta에 재제출하세요. 검토 중에는 상태가 다시 대기 중으로 바뀝니다.",
       "dialogNewDesc": "템플릿을 만들어 Meta 승인을 요청하세요. 승인되면 브로드캐스트와 인박스에서 사용할 수 있습니다.",
       "authWarning": "AUTHENTICATION 템플릿은 본문과 OTP 버튼 형식이 고정되어 있어 별도의 빌더가 필요합니다. 지금은 Meta WhatsApp 관리자에서 만든 뒤 <bold>Meta에서 동기화</bold>로 가져오세요.",
-
       "templateName": "템플릿 이름",
       "namePlaceholder": "예: order_confirmation",
       "nameFixed": "템플릿이 Meta에 존재하면 이름이 고정됩니다 — 변경하려면 새 템플릿을 만드세요.",
@@ -1384,7 +1411,6 @@
       "language": "언어",
       "langFixed": "템플릿이 Meta에 존재하면 언어가 고정됩니다.",
       "langHint": "Meta의 정확한 코드와 일치해야 합니다 — <code>en_US</code>와 <code>en</code>은 다른 코드입니다.",
-
       "header": "헤더",
       "headerNone": "없음",
       "headerText": "텍스트",
@@ -1394,7 +1420,6 @@
       "headerTextPlaceholder": "헤더 텍스트 (최대 60자, {{1}} 선택 가능)",
       "headerSampleAria": "헤더 변수 샘플 값",
       "headerSamplePlaceholder": "{{1}}의 샘플 값 (Meta 검토에 필요)",
-
       "uploadImage": "이미지 업로드",
       "uploadHint": "JPEG 또는 PNG, 5MB 이하",
       "mediaUrlPlaceholder": "https://… (또는 공개 {format} 링크 붙여넣기)",
@@ -1402,17 +1427,14 @@
       "mediaHint": "공개적으로 접근 가능한 HTTPS 링크여야 합니다. Meta가 검토 중 한 번 가져오므로 약 24시간 동안 살아있어야 합니다.",
       "videoHint": " 권장: MP4 / 3GPP, 16MB 이하, 60초 이하.",
       "documentHint": " 권장: PDF, 100MB 이하.",
-
       "bodyText": "본문 텍스트",
       "bodyPlaceholder": "안녕하세요 {{1}}님, 주문 {{2}}이(가) 확정되었습니다.",
       "sampleValues": "샘플 값 (Meta가 템플릿 검토에 사용합니다)",
       "bodyHint": "변수에는 {{1}}, {{2}}를 사용하세요 ({{1}}부터 연속되어야 합니다).",
       "sampleAria": "본문 변수 {var}의 샘플 값",
       "samplePlaceholder": "{var}의 샘플",
-
       "footer": "푸터 (선택)",
       "footerPlaceholder": "선택적 푸터 텍스트 (최대 60자)",
-
       "buttons": "버튼 (선택)",
       "addButton": "버튼 추가",
       "buttonsLimit": "최대 {max}개 버튼. QUICK_REPLY 버튼은 URL / 전화 / 코드 복사 버튼보다 앞에 와야 합니다.",
@@ -1425,19 +1447,16 @@
       "urlSamplePlaceholder": "{{1}}의 예시 값 (URL에 변수가 있을 때 필요)",
       "phonePlaceholder": "+15551234567",
       "codePlaceholder": "예시 코드 (예: SUMMER20)",
-
       "cancel": "취소",
       "saving": "저장 중…",
       "submitting": "제출 중…",
       "saveResubmit": "저장 & 재제출",
       "submitApproval": "승인 요청",
-
       "deleteDialogTitle": "템플릿을 삭제하시겠습니까?",
       "deleteMetaDesc": "\"{name}\"이(가) Meta와 wacrm에서 삭제됩니다. 이 템플릿을 사용하는 활성 브로드캐스트는 다음 전송부터 실패하기 시작합니다. 되돌릴 수 없습니다.",
       "deleteLocalDesc": "\"{name}\"이(가) wacrm에서 삭제됩니다. Meta에 제출된 적이 없으므로 별도의 원격 정리가 필요하지 않습니다.",
       "deleting": "삭제 중…",
       "delete": "삭제",
-
       "toastLoadFailed": "템플릿을 불러오지 못했습니다",
       "toastSubmitFailed": "제출하지 못했습니다",
       "toastSubmitEditSuccess": "수정 사항이 제출되었습니다 — Meta는 보통 24시간 이내에 검토합니다.",
@@ -1583,7 +1602,6 @@
       "profileSaved": "프로필이 저장되었습니다",
       "emailChangeFailed": "이메일 변경 실패: {message}",
       "profileSavedEmailCheck": "프로필이 저장되었습니다 — 이메일 주소 변경을 확인하려면 이메일을 확인하세요",
-
       "passwordTitle": "비밀번호",
       "passwordDesc": "최소 {min}자 이상 사용하세요. 변경 후에도 이 기기에서는 로그인이 유지됩니다.",
       "currentPassword": "현재 비밀번호",
@@ -1597,7 +1615,6 @@
       "currentPasswordIncorrect": "현재 비밀번호가 올바르지 않습니다",
       "passwordUpdateFailed": "비밀번호 업데이트 실패: {message}",
       "passwordUpdated": "비밀번호가 업데이트되었습니다",
-
       "sessionsTitle": "활성 세션",
       "sessionsDesc": "이 기기를 포함해 로그인되어 있는 모든 기기에서 로그아웃합니다. 노트북을 분실했거나 비밀번호를 공유한 경우 유용합니다.",
       "signOutAll": "모든 기기에서 로그아웃",
@@ -1610,10 +1627,12 @@
     },
     "appearance": {
       "title": "화면 설정",
-      "description": "앱 전체에서 사용할 모드와 강조 색상을 설정합니다. 이 기기에 저장되며, 바로 적용되니 자유롭게 시도해보세요.",
+      "description": "앱 전체에서 사용할 모드, UI 글꼴과 강조 색상을 설정합니다. 이 기기에 저장되며, 바로 적용되니 자유롭게 시도해보세요.",
       "mode": "모드",
       "useMode": "{mode} 모드 사용",
       "active": "사용 중",
+      "font": "글꼴",
+      "useFont": "{name} 글꼴 사용",
       "accentColor": "강조 색상",
       "useTheme": "{name} 테마 사용"
     },
@@ -1738,5 +1757,69 @@
       "reindexTooltip": "모든 문서를 다시 임베딩합니다 (예: 임베딩 키 추가 후)",
       "loading": "불러오는 중…"
     }
+  },
+  "Billing": {
+    "pageTitle": "빌링 & 요금제",
+    "pageDesc": "구동 관리, 사용 핬도, 인보이스를 관리하세요.",
+    "loading": "빌링 정보를 불러오는 중…",
+    "loadFailed": "빌링 정보를 불러올 수 없습니다. 새로 고침 후 다시 시도하세요.",
+    "actionFailed": "작업이 실패했습니다. 다시 시도하세요.",
+    "noPlan": "아직 플랜이 없습니다",
+    "trialEnds": "트라이어종 날",
+    "renewsOn": "갱신 날",
+    "cancelsAtEnd": "기간 끝에 취소",
+    "cancelsAtEndDesc": "구동은 현재 기간이 끝나면 취소됩니다. 그때까지 WACRM을 계속 사용할 수 있습니다.",
+    "payNow": "지금하기",
+    "reactivate": "구동 재시작",
+    "cancelPlan": "구동 취소",
+    "cancelTrial": "트라이어 취소",
+    "ownerOnly": "워크스페이스 소유자만 빌링을 관리할 수 있습니다.",
+    "usageTitle": "이번 기간 사용량",
+    "usageDesc": "플랜에 포함된 제한 중 사용 중인 내용입니다.",
+    "usageUnavailable": "지금은 사용 내역을 사용할 수 없습니다.",
+    "invoicesTitle": "인보이스",
+    "noInvoices": "아직 인보이스가 없습니다.",
+    "invoiceDate": "날짜",
+    "invoiceAmount": "금액",
+    "invoiceStatus": {
+      "pending": "대기 중",
+      "paid": "납부완료",
+      "failed": "실패",
+      "refunded": "환불됨"
+    },
+    "billedTo": "{name}에 청구",
+    "status": {
+      "trialing": "트라이어",
+      "active": "사용 중",
+      "past_due": "연체",
+      "grace_period": "유예 기간",
+      "suspended": "일시 정지",
+      "cancelled": "취소됨",
+      "expired": "만료됨"
+    },
+    "metric": {
+      "agents": "팀 멤버",
+      "contacts": "연락처",
+      "broadcasts": "바로보내기",
+      "automations": "자동화",
+      "whatsapp_numbers": "WhatsApp 번호"
+    },
+    "plansTitle": "플랜",
+    "plansDesc": "언제든지 플랜을 바꿈 수 있습니다. 결제는 다음 결제 사이클부터 적용되고, 제한은 즉시 반영됩니다.",
+    "currentPlan": "현재 플랜",
+    "perMonth": "월",
+    "featureContacts": "연락처 {n}개",
+    "featureAgents": "팀 멤버 {n}명",
+    "featureAi": "AI 얼리: {enabled}",
+    "yes": "사용 가능",
+    "no": "사용 불가",
+    "yourPlan": "내 플랜",
+    "switchTo": "이 플랜으로 바꾸기",
+    "gatewayTitle": "결제 게이트웨이",
+    "gatewayDesc": "이 워크스페이스에서 청구할 제공업체를 선택하세요. 향후 결제는 선택한 게이트웨이로 처리됩니다.",
+    "gatewayActive": "사용 중",
+    "gatewayNotConfigured": "미설정",
+    "gatewayNotLive": "결제 게이트웨이를 설정할 때까지 결제가 비활성화됩니다 — 서버 환경에서 API 키를 추가하거나 관리자에게 문의하세요.",
+    "gatewayOwnerOnly": "결제는 {provider}를 통해 청구됩니다. 게이트웨이를 바꾸려면 워크스페이스 소유자만 가능합니다."
   }
 }

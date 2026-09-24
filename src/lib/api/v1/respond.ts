@@ -21,6 +21,7 @@ export type ApiErrorCode =
   | 'unauthorized' // missing / malformed / unknown / revoked / expired key
   | 'forbidden' // valid key, but missing the required scope
   | 'rate_limited' // per-key budget exhausted
+  | 'usage_limit' // plan cap reached for the account
   | 'bad_request' // malformed input
   | 'not_found'
   | 'internal';

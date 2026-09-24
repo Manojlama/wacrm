@@ -171,6 +171,10 @@ export function MessageThread({
   const { user } = useAuth();
   const { getPresence, getRow, now } = usePresence();
   const [loading, setLoading] = useState(false);
+  // Set when the messages fetch fails. Renders an inline error note with
+  // a retry instead of the misleading "No messages yet" empty state —
+  // a dead thread that looks empty is worse than a visible failure.
+  const [messagesError, setMessagesError] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -298,6 +302,7 @@ export function MessageThread({
 
     (async () => {
       setLoading(true);
+      setMessagesError(false);
 
       const { data, error } = await supabase
         .from("messages")
@@ -309,6 +314,7 @@ export function MessageThread({
 
       if (error) {
         console.error("Failed to fetch messages:", error);
+        setMessagesError(true);
       } else {
         onMessagesLoadedRef.current(data ?? []);
       }
@@ -902,7 +908,7 @@ export function MessageThread({
     <div className={cn("flex min-w-0 flex-1 flex-col", DOODLE_BG_CLASSES)}>
       {/* Header — solid card surface sits on top of the doodle so the
           name/avatar/dropdowns stay legible. */}
-      <div className="flex items-center justify-between gap-2 border-b border-border bg-card px-3 py-3 sm:px-4">
+      <div className="flex items-center justify-between gap-2 border-b border-border glass-card px-3 py-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           {/* Back-to-list button — mobile only. Hidden on lg+ where the
               conversation list is always visible next to the thread. */}
@@ -1084,6 +1090,18 @@ export function MessageThread({
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
+        ) : messagesError ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <p className="text-sm text-muted-foreground">{t("loadFailed")}</p>
+            <button
+              type="button"
+              onClick={handleRefreshClick}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs text-foreground transition-colors hover:bg-muted/60"
+            >
+              <RefreshCw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
+              {t("retry")}
+            </button>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">

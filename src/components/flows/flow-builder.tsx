@@ -273,7 +273,7 @@ function TriggerPanel({
   t: ReturnType<typeof useTranslations>;
 }) {
   return (
-    <section className="border-border bg-card rounded-lg border p-4">
+    <section className="border-border glass-card rounded-lg border p-4">
       <h2 className="text-foreground mb-3 text-sm font-semibold">{t('triggerTitle')}</h2>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
@@ -355,7 +355,7 @@ function EntryPicker({
 }) {
   if (state.nodes.length === 0) return null;
   return (
-    <section className="border-border bg-card flex items-center gap-3 rounded-lg border p-3">
+    <section className="border-border glass-card flex items-center gap-3 rounded-lg border p-3">
       <CornerDownRight className="text-primary h-4 w-4 shrink-0" />
       <span className="text-muted-foreground text-xs">{t('entryNodeTitle')}</span>
       <NodeKeySelect
@@ -411,7 +411,7 @@ function NodeCard({
     <div
       ref={cardRef}
       className={cn(
-        'bg-card relative overflow-hidden rounded-xl border transition-shadow duration-500',
+        'glass-card relative overflow-hidden rounded-xl border transition-shadow duration-500',
         hasError
           ? 'border-red-500/40'
           : isEntry
@@ -595,7 +595,7 @@ function AddNodeButton({ onAdd, t }: { onAdd: (type: NodeType) => void; t: Retur
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="border-border bg-card text-foreground hover:bg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+        className="border-border glass-card text-foreground hover:bg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
         aria-label={t('addNode')}
       >
         <Plus className="h-3.5 w-3.5" />

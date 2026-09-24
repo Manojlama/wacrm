@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Notification } from "@/types";
 
 /**
+ * Channel names must be unique per hook instance: the browser client is a
+ * singleton shared across every consumer, and realtime-js throws if you
+ * attach callbacks to a channel that has already been `.subscribe()`d.
+ * Two consumers (sidebar + header) both calling `supabase.channel("…")`
+ * with the same name would get back the *same* subscribed channel and blow
+ * up as soon as the second one calls `.on()`. A per-call suffix sidesteps
+ * that — each instance owns its own subscription.
+ */
+let channelSeq = 0;
+
+/**
  * Count of unread notifications for the current user. Used by the
- * sidebar to surface a badge on the Notifications nav entry.
+ * sidebar to surface a badge on the Notifications nav entry, and by the
+ * header for an always-visible shortcut, as well.
  *
  * RLS on `notifications` already scopes every read to `auth.uid() =
  * user_id`, so no explicit filter is needed here — same pattern as
@@ -14,6 +26,9 @@ import type { Notification } from "@/types";
  */
 export function useUnreadNotifications(): number {
   const [count, setCount] = useState(0);
+  const channelNameRef = useRef(
+    `notifications-unread-count-${++channelSeq}`,
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -31,7 +46,7 @@ export function useUnreadNotifications(): number {
     })();
 
     const channel = supabase
-      .channel("notifications-unread-count")
+      .channel(channelNameRef.current)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "notifications" },

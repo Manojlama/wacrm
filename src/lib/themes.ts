@@ -15,9 +15,14 @@
 
 export const THEME_IDS = [
   "violet",
+  "indigo",
   "emerald",
+  "teal",
   "cobalt",
+  "cyan",
+  "slate",
   "amber",
+  "orange",
   "rose",
 ] as const;
 
@@ -74,10 +79,22 @@ export const THEMES: ReadonlyArray<ThemeMeta> = [
     swatch: "oklch(0.526 0.247 293)",
   },
   {
+    id: "indigo",
+    name: "Indigo",
+    tagline: "Richer than violet — deep, focused, enterprise-friendly.",
+    swatch: "oklch(0.55 0.23 276)",
+  },
+  {
     id: "emerald",
     name: "Emerald",
     tagline: "Growth-coded, nods at messaging without copying WhatsApp green.",
     swatch: "oklch(0.62 0.16 162)",
+  },
+  {
+    id: "teal",
+    name: "Teal",
+    tagline: "Calm green-blue — reassuring and easy on the eyes.",
+    swatch: "oklch(0.65 0.14 180)",
   },
   {
     id: "cobalt",
@@ -86,10 +103,28 @@ export const THEMES: ReadonlyArray<ThemeMeta> = [
     swatch: "oklch(0.585 0.2 254)",
   },
   {
+    id: "cyan",
+    name: "Cyan",
+    tagline: "Bright, technical — great for dev-tool and AI products.",
+    swatch: "oklch(0.66 0.16 220)",
+  },
+  {
+    id: "slate",
+    name: "Slate",
+    tagline: "Neutral steel blue — understated, professional, minimal.",
+    swatch: "oklch(0.6 0.07 250)",
+  },
+  {
     id: "amber",
     name: "Amber",
     tagline: "Warm and friendly — feels good for SMB teams.",
     swatch: "oklch(0.745 0.16 65)",
+  },
+  {
+    id: "orange",
+    name: "Orange",
+    tagline: "Energetic and approachable — motion, food, consumer apps.",
+    swatch: "oklch(0.71 0.19 45)",
   },
   {
     id: "rose",

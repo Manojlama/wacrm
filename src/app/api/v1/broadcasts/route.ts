@@ -25,6 +25,10 @@
 import { after } from 'next/server';
 
 import { requireApiKey } from '@/lib/auth/api-context';
+import {
+  canCreateBroadcast,
+  incrementUsage,
+} from '@/lib/subscriptions/entitlements';
 
 // The `after()` fan-out below sends to every recipient sequentially and
 // runs within this route's max duration (the same constraint the
@@ -37,6 +41,7 @@ import { requireApiKey } from '@/lib/auth/api-context';
 export const maxDuration = 60;
 import { ok, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
 import { resolveAuditUserId, ContactError } from '@/lib/api/v1/contacts';
+import { EntitlementError } from '@/lib/subscriptions/entitlements';
 import {
   createBroadcast,
   deliverBroadcast,
@@ -61,6 +66,10 @@ export async function POST(request: Request) {
 
     const auditUserId = await resolveAuditUserId(ctx.supabase, ctx.accountId);
 
+    // Enforce the plan's broadcast cap before launching. No campaigns
+    // are counted at this point, so failing here is a no-op.
+    await canCreateBroadcast(ctx.accountId);
+
     const plan = await createBroadcast(ctx.supabase, ctx.accountId, auditUserId, {
       name: typeof body.name === 'string' ? body.name : null,
       templateName,
@@ -78,6 +87,8 @@ export async function POST(request: Request) {
     // client — no request-scoped auth needed for the Meta calls or
     // the account-scoped row updates.
     after(() => deliverBroadcast(ctx.supabase, plan));
+
+    await incrementUsage(ctx.accountId, 'broadcasts');
 
     return ok(
       {
@@ -99,6 +110,9 @@ export async function POST(request: Request) {
         err.message,
         err.status
       );
+    }
+    if (err instanceof EntitlementError) {
+      return fail('usage_limit', err.message, 403);
     }
     return toApiErrorResponse(err);
   }

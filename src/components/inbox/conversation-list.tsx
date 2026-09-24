@@ -9,7 +9,7 @@ import {
 } from "@/lib/inbox/conversations";
 import { cn } from "@/lib/utils";
 import type { Conversation, ConversationStatus, Tag } from "@/types";
-import { Search, ChevronDown, X } from "lucide-react";
+import { Search, ChevronDown, X, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,12 @@ interface ConversationListProps {
    * or the tab was throttled. Optional so existing callers keep working.
    */
   resyncToken?: number;
+  /**
+   * Realtime socket state from the parent's useRealtime. Drives the
+   * tiny Live / Reconnecting chip under the search box so a dropped
+   * connection is visible instead of silently freezing the list.
+   */
+  isLive?: boolean;
 }
 
 const STATUS_COLORS: Record<ConversationStatus, string> = {
@@ -52,6 +58,7 @@ export function ConversationList({
   conversations,
   onConversationsLoaded,
   resyncToken = 0,
+  isLive = false,
 }: ConversationListProps) {
   const t = useTranslations("Inbox.conversationList");
   
@@ -66,6 +73,14 @@ export function ConversationList({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [loading, setLoading] = useState(true);
+  // Whether the initial (or retried) conversations fetch failed. Kept
+  // separate from `loading` so a failure renders an error state with a
+  // retry button instead of silently falling through to the "no
+  // conversations" empty state (which reads as "you have nothing" even
+  // though we simply couldn't reach the DB).
+  const [loadError, setLoadError] = useState(false);
+  // Bumped by the error-state retry button to refire the fetch effect.
+  const [retryToken, setRetryToken] = useState(0);
   // Contact-based filters (issue #272). Tags use OR logic (a conversation
   // matches if its contact carries any selected tag), consistent with
   // Broadcast audience filtering. Company is an exact match on the field.
@@ -111,9 +126,14 @@ export function ConversationList({
           code: error.code,
         });
         setLoading(false);
+        setLoadError(true);
         return;
       }
 
+      // Success clears any prior error state — the flag lives until the
+      // next fetch settles, so the retry path resets it from the async
+      // callback rather than synchronously inside the effect.
+      setLoadError(false);
       onConversationsLoadedRef.current(normalizeConversations(data ?? []));
       setLoading(false);
     })();
@@ -124,7 +144,8 @@ export function ConversationList({
     // `resyncToken` is included so the parent can force a refetch when
     // the realtime channel reconnects or the tab regains focus — catches
     // up on any events sent while the WS was disconnected or throttled.
-  }, [resyncToken]);
+    // `retryToken` refires it from the inline error-state retry button.
+  }, [resyncToken, retryToken]);
 
   // Tag definitions for the filter picker — loaded once so labels/colours
   // stay stable regardless of which conversations happen to be loaded.
@@ -203,6 +224,21 @@ export function ConversationList({
 
   const hasContactFilters = selectedTagIds.length > 0 || selectedCompany !== null;
 
+  // Anything that narrows the list at all — used to distinguish the
+  // "no results" empty state (filters active) from the "nothing here
+  // yet" one (fresh inbox, no filters).
+  const hasActiveFilters =
+    filter !== "all" || search.trim().length > 0 || hasContactFilters;
+
+  // Nukes every filter at once — the "Clear filters" affordance on the
+  // no-results empty state.
+  const clearAllFilters = useCallback(() => {
+    setSearch("");
+    setFilter("all");
+    setSelectedTagIds([]);
+    setSelectedCompany(null);
+  }, []);
+
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearch(e.target.value);
@@ -223,7 +259,7 @@ export function ConversationList({
     // w-full on mobile so the list occupies the whole viewport when it's
     // the single pane showing; fixed 320px on desktop where it shares the
     // row with the thread + contact sidebar.
-    <div className="flex h-full w-full flex-col border-r border-border bg-card lg:w-80">
+    <div className="flex h-full w-full flex-col border-r border-border glass-card lg:w-80">
       {/* Search + Filter */}
       <div className="space-y-2 border-b border-border p-3">
         <div className="relative">
@@ -388,6 +424,23 @@ export function ConversationList({
             </button>
           </div>
         )}
+
+        {/* Realtime status — tiny and unobtrusive. A silent dead socket
+            (laptop sleep, flaky network) is confusing precisely because
+            the app otherwise feels live; this chip makes the connection
+            state legible. */}
+        <div className="flex items-center gap-1.5 pt-0.5">
+          <span
+            className={cn(
+              "h-1.5 w-1.5 rounded-full",
+              isLive ? "bg-emerald-500" : "bg-amber-500",
+            )}
+            aria-hidden
+          />
+          <span className="text-[10px] text-muted-foreground">
+            {isLive ? t("live") : t("reconnecting")}
+          </span>
+        </div>
       </div>
 
       {/* Conversation Items.
@@ -401,10 +454,40 @@ export function ConversationList({
           <div className="flex items-center justify-center py-12">
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="px-4 py-12 text-center">
-            <p className="text-sm text-muted-foreground">{t("noConversations")}</p>
+        ) : loadError ? (
+          <div className="flex flex-col items-center gap-3 px-4 py-12 text-center">
+            <p className="text-sm text-muted-foreground">{t("loadFailed")}</p>
+            <button
+              type="button"
+              onClick={() => setRetryToken((n) => n + 1)}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs text-foreground transition-colors hover:bg-muted/60"
+            >
+              <RefreshCw className="h-3 w-3" />
+              {t("retry")}
+            </button>
           </div>
+        ) : filtered.length === 0 ? (
+          hasActiveFilters ? (
+            <div className="flex flex-col items-center gap-3 px-4 py-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                {t("noConversationsMatch")}
+              </p>
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs text-foreground transition-colors hover:bg-muted/60"
+              >
+                <X className="h-3 w-3" />
+                {t("clearFilters")}
+              </button>
+            </div>
+          ) : (
+            <div className="px-4 py-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                {t("noConversationsYet")}
+              </p>
+            </div>
+          )
         ) : (
           <div className="flex flex-col">
             {filtered.map((conv) => (

@@ -590,6 +590,7 @@ function InboxPageInner() {
             conversations={conversations}
             onConversationsLoaded={handleConversationsLoaded}
             resyncToken={resyncToken}
+            isLive={isConnected}
           />
         </div>
 

@@ -364,7 +364,7 @@ function ListEditor({
           </div>
           <div className="flex flex-col gap-2">
             {section.rows.map((row, rIdx) => (
-              <div key={rIdx} className="rounded border border-border bg-card p-2">
+              <div key={rIdx} className="rounded border border-border glass-card p-2">
                 <div className="flex items-center gap-2">
                   {advanced && (
                     <Input

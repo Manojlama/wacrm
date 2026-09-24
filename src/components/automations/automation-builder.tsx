@@ -808,7 +808,7 @@ function TriggerCard({
     // Card width: full on mobile, fixed 320px on sm+. The canvas wrapper
     // (max-w-2xl + px-4) keeps this tidy on tablet/desktop.
     <div className="z-10 w-full max-w-[320px] sm:w-80">
-      <div className="rounded-lg border border-border border-l-4 border-l-blue-500 bg-card shadow-lg">
+      <div className="rounded-lg border border-border border-l-4 border-l-blue-500 glass-card shadow-lg">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -1118,7 +1118,7 @@ function StepRenderer({
       <div className={cn("z-10 flex min-w-0 flex-col", width)}>
         <div
           className={cn(
-            "rounded-lg border border-border border-l-4 bg-card shadow-lg",
+            "rounded-lg border border-border border-l-4 glass-card shadow-lg",
             meta.border,
           )}
         >

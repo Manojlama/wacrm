@@ -138,6 +138,19 @@ export async function findOrCreateContact(
     .single();
 
   if (error || !created) {
+    // The contacts usage-cap trigger (migration 041) raises
+    // `USAGE_LIMIT_REACHED` — surface it as a clean 403 instead of a
+    // misleading 500.
+    if (
+      error &&
+      typeof error.message === "string" &&
+      error.message.includes("USAGE_LIMIT_REACHED")
+    ) {
+      throw new ContactError(
+        "Monthly contact limit reached for this plan; upgrade to add more contacts",
+        403,
+      );
+    }
     // Lost a race against a concurrent create — the unique index
     // rejected the duplicate. Re-resolve to the winner.
     if (isUniqueViolation(error)) {

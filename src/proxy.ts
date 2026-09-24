@@ -1,7 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+// Super-admin gate: /admin is only for platform staff listed in
+// SUPER_ADMIN_EMAILS. Individual users' org-level roles (owner/admin/)
+// do NOT grant /admin access — that's a separate, platform-wide role.
+function isSuperAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false
+  const raw = process.env.SUPER_ADMIN_EMAILS ?? ''
+  return raw
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(email.toLowerCase())
+}
+
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -13,7 +26,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          for (const { name, value } of cookiesToSet) request.cookies.set(name, value)
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -70,11 +83,24 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protected pages - redirect to login if not authenticated
-  const protectedPaths = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/settings']
+  const protectedPaths = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/settings', '/onboarding', '/flows', '/agents', '/notifications']
   if (!user && protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return withRefreshedCookies(NextResponse.redirect(url))
+  }
+
+  // Super-admin routes — if not signed in, go to login. If signed in
+  // but not a super-admin, 404 (avoid leaking that /admin exists).
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return withRefreshedCookies(NextResponse.redirect(url))
+    }
+    if (!isSuperAdminEmail(user.email)) {
+      return withRefreshedCookies(NextResponse.rewrite(new URL('/not-found', request.url)))
+    }
   }
 
   // API routes that need auth (not webhooks)

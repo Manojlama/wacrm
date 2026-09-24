@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
 import { requireRole, toErrorResponse } from '@/lib/auth/account'
+import {
+  canCreateBroadcast,
+  incrementUsage,
+} from '@/lib/subscriptions/entitlements'
 import { sendTemplateMessage } from '@/lib/whatsapp/meta-api'
 import { decrypt } from '@/lib/whatsapp/encryption'
 import type { SendTimeParams } from '@/lib/whatsapp/template-send-builder'
@@ -73,6 +77,12 @@ export async function POST(request: Request) {
     // Nothing about that is recoverable after the fact, so the check has
     // to happen here.
     const { supabase, accountId, userId } = await requireRole('agent')
+
+    // Enforce the plan's broadcast cap. Drafts (broadcasts table rows)
+    // don't count against this metric — the cap meters actual send
+    // campaigns initiated, exactly like this endpoint. Fails fast with
+    // a clean 403 before any Meta call.
+    await canCreateBroadcast(accountId)
 
     // Per-user broadcast budget. Note: this limits how often a user
     // can *start* a campaign, not how many messages go out inside
@@ -230,6 +240,11 @@ export async function POST(request: Request) {
         failedCount++
       }
     }
+
+    // Record the campaign against the plan's broadcast cap. This
+    // endpoint writes nothing else to the DB, so the counter is the
+    // only place the send is tracked for entitlements.
+    await incrementUsage(accountId, 'broadcasts')
 
     return NextResponse.json({
       success: true,

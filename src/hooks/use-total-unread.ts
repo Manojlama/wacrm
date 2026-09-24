@@ -5,15 +5,30 @@ import { createClient } from "@/lib/supabase/client";
 import type { Conversation } from "@/types";
 
 /**
+ * Channel names must be unique per hook instance: the browser client is a
+ * singleton shared across every consumer, and realtime-js throws if you
+ * attach callbacks to a channel that has already been `.subscribe()`d.
+ * Two consumers (sidebar + header) both calling `supabase.channel("…")`
+ * with the same name would get back the *same* subscribed channel and blow
+ * up as soon as the second one calls `.on()`. A per-call suffix sidesteps
+ * that — each instance owns its own subscription.
+ */
+let channelSeq = 0;
+
+/**
  * Count of conversations with at least one unread inbound message for
  * the current user. Used by the sidebar to surface a green dot on the
- * Inbox nav entry when the user is elsewhere in the app.
+ * Inbox nav entry when the user is elsewhere in the app, and by the
+ * header for an always-visible shortcut, as well.
  *
  * Lives on its own realtime channel (distinct from the inbox page's
  * "inbox-realtime") so both can coexist without sharing state.
  */
 export function useTotalUnread(): number {
   const [total, setTotal] = useState(0);
+  const channelNameRef = useRef(
+    `total-unread-realtime-${++channelSeq}`,
+  );
 
   // Keep a live local mirror of {id: unread_count} so INSERT/UPDATE/DELETE
   // events can adjust the total in O(1) without refetching.
@@ -43,7 +58,7 @@ export function useTotalUnread(): number {
     })();
 
     const channel = supabase
-      .channel("total-unread-realtime")
+      .channel(channelNameRef.current)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "conversations" },

@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, Menu, Settings as SettingsIcon, User } from "lucide-react";
+import {
+  LogOut,
+  Menu,
+  Settings as SettingsIcon,
+  User,
+  MessageSquare,
+  Bell,
+} from "lucide-react";
+import { useTotalUnread } from "@/hooks/use-total-unread";
+import { useUnreadNotifications } from "@/hooks/use-unread-notifications";
 import {
   Avatar,
   AvatarFallback,
@@ -50,14 +59,23 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
   const titleKey = getPageTitleKey(pathname);
+  // Team-shared unread signals. The sidebar already shows these as a dot
+  // next to the Inbox / badge on Notifications, but that drawer is hidden
+  // behind the hamburger on phones — surfacing them in the header means
+  // a mobile user gets the same "something needs you" signal at a glance.
+  const totalUnread = useTotalUnread();
+  const unreadNotifications = useUnreadNotifications();
 
   const initial =
     profile?.full_name?.charAt(0)?.toUpperCase() ??
     profile?.email?.charAt(0)?.toUpperCase() ??
     "U";
 
+  const notificationBadge =
+    unreadNotifications > 9 ? "9+" : String(unreadNotifications);
+
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-background px-4 lg:px-6">
+    <header className="glass-bar flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border px-4 lg:px-6">
       <div className="flex min-w-0 items-center gap-2">
         {/* Hamburger — mobile only. 44×44 hit target per Apple HIG. */}
         <button
@@ -74,6 +92,41 @@ export function Header({ onOpenSidebar }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
+        {/* Inbox shortcut with an unread dot — cheap jump from anywhere,
+            and the one place a phone user sees unread at a glance. */}
+        <Link
+          href="/inbox"
+          aria-label={t("unreadMessages", { count: totalUnread })}
+          className="relative flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <MessageSquare className="h-5 w-5" />
+          {totalUnread > 0 && (
+            <span
+              aria-hidden
+              className="absolute right-2 top-2 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background"
+            />
+          )}
+        </Link>
+
+        {/* Notifications shortcut with a badge — mirrors the sidebar count. */}
+        <Link
+          href="/notifications"
+          aria-label={t("unreadNotifications", {
+            count: unreadNotifications,
+          })}
+          className="relative flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <Bell className="h-5 w-5" />
+          {unreadNotifications > 0 && (
+            <span
+              aria-hidden
+              className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground ring-2 ring-background"
+            >
+              {notificationBadge}
+            </span>
+          )}
+        </Link>
+
         <ModeToggle />
 
         <DropdownMenu>

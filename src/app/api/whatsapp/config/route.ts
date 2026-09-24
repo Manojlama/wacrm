@@ -7,6 +7,11 @@ import {
   verifyPhoneNumber,
 } from '@/lib/whatsapp/meta-api'
 import { encrypt, decrypt } from '@/lib/whatsapp/encryption'
+import {
+  canConnectWhatsApp,
+  incrementUsage,
+} from '@/lib/subscriptions/entitlements'
+import { toErrorResponse } from '@/lib/auth/account'
 
 /**
  * Resolve the caller's account_id from their profile. Inlined here
@@ -282,6 +287,18 @@ export async function POST(request: Request) {
       existing?.phone_number_id === phone_number_id &&
       existing?.registered_at != null
 
+    // No pre-existing row means this call is connecting a NEW WhatsApp
+    // number to the account — enforce the plan's whatsapp_numbers cap
+    // before saving so we fail fast with a clean 403, before any
+    // /register or /subscribe side effects.
+    if (!existing) {
+      try {
+        await canConnectWhatsApp(accountId)
+      } catch (err) {
+        return toErrorResponse(err)
+      }
+    }
+
     // Step 1: register the phone number for inbound webhooks.
     //
     // Attempted on first save AND whenever the user supplies a fresh
@@ -399,6 +416,11 @@ export async function POST(request: Request) {
           { status: 500 }
         )
       }
+
+      // New connection — record it against the plan cap. Throwing
+      // here (rather than silently swallowing) keeps the counter
+      // authoritative: a lost increment would weaken later guards.
+      await incrementUsage(accountId, 'whatsapp_numbers')
     }
 
     if (registrationError) {

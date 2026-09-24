@@ -24,7 +24,7 @@ export function InteractivePreview({
   return (
     <div
       className={cn(
-        "w-full max-w-[260px] overflow-hidden rounded-lg bg-card text-foreground shadow-sm ring-1 ring-border",
+        "w-full max-w-[260px] overflow-hidden rounded-lg glass-card text-foreground shadow-sm ring-1 ring-border",
         className,
       )}
     >

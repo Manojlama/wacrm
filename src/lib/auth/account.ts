@@ -29,6 +29,7 @@ import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { EntitlementError } from "@/lib/subscriptions/entitlements";
 import { hasMinRole, isAccountRole, type AccountRole } from "./roles";
 
 // ------------------------------------------------------------
@@ -70,6 +71,9 @@ export function toErrorResponse(err: unknown): NextResponse {
   if (err instanceof UnauthorizedError || err instanceof ForbiddenError) {
     return NextResponse.json({ error: err.message }, { status: err.status });
   }
+  if (err instanceof EntitlementError) {
+    return NextResponse.json({ error: err.message }, { status: err.status });
+  }
   console.error("[toErrorResponse] uncategorized error:", err);
   return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 }
@@ -83,6 +87,8 @@ export interface AccountContext {
   supabase: SupabaseClient;
   /** `auth.uid()` for the caller. Always defined when this resolves. */
   userId: string;
+  /** Caller's email (from the Supabase auth user). */
+  userEmail: string | null;
   /** Caller's account_id from their profile row. */
   accountId: string;
   /** Caller's role within their account. */
@@ -166,6 +172,7 @@ export async function getCurrentAccount(): Promise<AccountContext> {
   return {
     supabase,
     userId: user.id,
+    userEmail: user.email ?? null,
     accountId: data.account_id,
     role: data.account_role,
     account: { id: account.id, name: account.name },

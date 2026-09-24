@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
-import { Inter } from "next/font/google";
+import { Inter, Lexend, Manrope, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { ThemedToaster } from "@/components/themed-toaster";
+import { branding } from "@/lib/branding";
+import { FONT_IDS, FONT_STORAGE_KEY, DEFAULT_FONT } from "@/lib/fonts";
 import {
   DEFAULT_MODE,
   DEFAULT_THEME,
@@ -16,16 +18,31 @@ import {
 } from "@/lib/themes";
 
 const inter = Inter({
-  variable: "--font-sans",
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+});
+
+const lexend = Lexend({
+  variable: "--font-lexend",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "wacrm",
-    template: "%s — wacrm",
+    default: branding.name,
+    template: `%s — ${branding.name}`,
   },
-  description: "Self-hostable CRM template for WhatsApp.",
+  description: `${branding.name} — a WhatsApp-first CRM for sales teams. Inbox, broadcasts, automations, and AI replies in one place.`,
   robots: {
     index: false,
     follow: false,
@@ -46,15 +63,15 @@ export const viewport: Viewport = {
 };
 
 // Inline boot script — runs before React hydrates so the user's
-// chosen accent (data-theme) AND mode (data-mode) are on the <html>
-// element before first paint. Without this every page load flashes
-// the server-rendered defaults for a frame before the React tree
-// mounts and applies the picked values.
+// chosen accent (data-theme), mode (data-mode) AND font (data-font)
+// are on the <html> element before first paint. Without this every
+// page load flashes the server-rendered defaults for a frame before
+// the React tree mounts and applies the picked values.
 //
 // Kept dependency-free (no imports, no JSX) — must be a string the
 // browser can run as a single <script>. Knowledge of valid ids is
-// sourced from the THEME_IDS / MODES constants so adding one doesn't
-// silently break the boot path.
+// sourced from the THEME_IDS / MODES / FONT_IDS constants so adding
+// one doesn't silently break the boot path.
 const THEME_BOOT_SCRIPT = `
 (function(){
   var d = document.documentElement;
@@ -70,9 +87,16 @@ const THEME_BOOT_SCRIPT = `
     var MODES = ${JSON.stringify(MODES)};
     var savedMode = localStorage.getItem(MODE_KEY);
     d.dataset.mode = MODES.indexOf(savedMode) !== -1 ? savedMode : MODE_DEFAULT;
+
+    var FONT_KEY = ${JSON.stringify(FONT_STORAGE_KEY)};
+    var FONT_DEFAULT = ${JSON.stringify(DEFAULT_FONT)};
+    var FONTS = ${JSON.stringify(FONT_IDS)};
+    var savedFont = localStorage.getItem(FONT_KEY);
+    d.dataset.font = FONTS.indexOf(savedFont) !== -1 ? savedFont : FONT_DEFAULT;
   } catch (_e) {
     d.dataset.theme = ${JSON.stringify(DEFAULT_THEME)};
     d.dataset.mode = ${JSON.stringify(DEFAULT_MODE)};
+    d.dataset.font = ${JSON.stringify(DEFAULT_FONT)};
   }
 })();
 `;
@@ -90,14 +114,15 @@ export default async function RootLayout({
       lang={locale}
       data-theme={DEFAULT_THEME}
       data-mode={DEFAULT_MODE}
-      className={`${inter.variable} h-full antialiased`}
-      // The `theme-boot` script below rewrites `data-theme` and
-      // `data-mode` on <html> from localStorage before React hydrates,
-      // so for any non-default choice the client DOM intentionally
-      // differs from the server-rendered defaults. suppressHydration-
-      // Warning silences the expected mismatch — it only applies to
-      // this element's own attributes, so genuine mismatches in
-      // children still surface.
+      data-font={DEFAULT_FONT}
+      className={`${inter.variable} ${manrope.variable} ${spaceGrotesk.variable} ${lexend.variable} h-full antialiased`}
+      // The `theme-boot` script below rewrites `data-theme`,
+      // `data-mode` and `data-font` on <html> from localStorage before
+      // React hydrates, so for any non-default choice the client DOM
+      // intentionally differs from the server-rendered defaults.
+      // suppressHydrationWarning silences the expected mismatch — it
+      // only applies to this element's own attributes, so genuine
+      // mismatches in children still surface.
       suppressHydrationWarning
     >
       <head>

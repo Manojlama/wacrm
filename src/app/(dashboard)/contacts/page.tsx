@@ -49,6 +49,7 @@ import {
   SlidersHorizontal,
   Filter,
   X,
+  RefreshCw,
 } from 'lucide-react';
 import { ContactForm } from '@/components/contacts/contact-form';
 import { ContactDetailView } from '@/components/contacts/contact-detail-view';
@@ -72,6 +73,10 @@ export default function ContactsPage() {
 
   const [contacts, setContacts] = useState<ContactWithTags[]>([]);
   const [loading, setLoading] = useState(true);
+  // Whether the last fetch failed. Without this, a failed load would
+  // fall through to the empty state and read "no contacts" even though
+  // the DB simply wasn't reachable.
+  const [loadError, setLoadError] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
@@ -121,6 +126,7 @@ export default function ContactsPage() {
   const fetchContacts = useCallback(async () => {
     const seq = ++fetchSeq.current;
     setLoading(true);
+    setLoadError(false);
     // The visible rows are about to change — drop any selection that
     // referred to the old page/search results so the bulk bar can't
     // act on rows the user can no longer see.
@@ -148,6 +154,7 @@ export default function ContactsPage() {
       if (error) {
         toast.error(t('toastFailedLoad'));
         setLoading(false);
+        setLoadError(true);
         return;
       }
       const rows = (data ?? []) as { contact: Contact; total_count: number }[];
@@ -170,6 +177,7 @@ export default function ContactsPage() {
       if (error) {
         toast.error(t('toastFailedLoad'));
         setLoading(false);
+        setLoadError(true);
         return;
       }
       contactRows = data ?? [];
@@ -396,7 +404,7 @@ export default function ContactsPage() {
                 setPage(0);
               }}
               placeholder={t('searchPlaceholder')}
-              className="pl-8 bg-card border-border text-foreground placeholder:text-muted-foreground"
+              className="pl-8 glass-card border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
@@ -557,6 +565,23 @@ export default function ContactsPage() {
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="size-6 animate-spin text-primary" />
                     <p className="text-sm text-muted-foreground">{t('loading')}</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : loadError ? (
+              <TableRow className="border-border">
+                <TableCell colSpan={8} className="text-center py-12">
+                  <div className="flex flex-col items-center gap-3">
+                    <p className="text-sm text-destructive">{t('loadFailed')}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void fetchContacts()}
+                      className="border-border text-foreground"
+                    >
+                      <RefreshCw className="mr-1.5 size-3.5" />
+                      {t('retry')}
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

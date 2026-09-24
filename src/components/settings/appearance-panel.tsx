@@ -1,27 +1,28 @@
 "use client";
 
-import { Check, Moon, Palette, SunMoon, Sun } from "lucide-react";
+import { Check, Moon, Palette, SunMoon, Sun, Type } from "lucide-react";
 
 import { useTheme } from "@/hooks/use-theme";
+import { FONTS, type FontId } from "@/lib/fonts";
 import { MODES, THEMES, type Mode, type ThemeId } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { SettingsPanelHead } from "./settings-panel-head";
 
 /**
- * Appearance panel — light/dark mode + accent-color picker.
+ * Appearance panel — light/dark mode, UI font, and accent-color picker.
  *
- * Two independent controls: a mode toggle (light / dark) and the
- * accent grid. Either applies + persists immediately. No save button:
- * each change is a single attribute swap on <html>, there's nothing
- * to roll back.
+ * Three independent controls: a mode toggle (light / dark), the font
+ * grid (Inter / Manrope / Space Grotesk / Lexend) and the accent grid.
+ * Either applies + persists immediately. No save button: each change
+ * is a single attribute swap on <html>, there's nothing to roll back.
  *
  * Persistence: localStorage only (device-scoped). The boot script in
- * layout.tsx replays both choices before first paint on subsequent
- * loads.
+ * layout.tsx replays all three choices before first paint on
+ * subsequent loads.
  */
 export function AppearancePanel() {
-  const { theme, setTheme, mode, setMode } = useTheme();
+  const { theme, setTheme, mode, setMode, font, setFont } = useTheme();
   const t = useTranslations("Settings.appearance");
 
   return (
@@ -48,6 +49,32 @@ export function AppearancePanel() {
               mode={m}
               isActive={m === mode}
               onPick={() => setMode(m)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Type className="size-4 text-muted-foreground" />
+          {t("font")}
+        </h3>
+
+        <div
+          role="radiogroup"
+          aria-label="UI font"
+          className="grid max-w-md grid-cols-2 gap-3"
+        >
+          {FONTS.map((f) => (
+            <FontCard
+              key={f.id}
+              id={f.id}
+              name={f.name}
+              tagline={f.tagline}
+              family={f.family}
+              sample={f.sample}
+              isActive={f.id === font}
+              onPick={() => setFont(f.id)}
             />
           ))}
         </div>
@@ -97,7 +124,7 @@ function ModeCard({
       aria-checked={isActive}
       aria-label={t("useMode", { mode })}
       className={cn(
-        "flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-colors",
+        "flex items-center gap-3 rounded-lg border glass-card p-4 text-left transition-colors",
         isActive
           ? "border-primary/60 ring-2 ring-primary/40"
           : "border-border hover:border-border hover:bg-muted/40",
@@ -118,6 +145,57 @@ function ModeCard({
           {t("active")}
         </span>
       )}
+    </button>
+  );
+}
+
+function FontCard({
+  id,
+  name,
+  tagline,
+  family,
+  sample,
+  isActive,
+  onPick,
+}: {
+  id: FontId;
+  name: string;
+  tagline: string;
+  family: string;
+  sample: string;
+  isActive: boolean;
+  onPick: () => void;
+}) {
+  const t = useTranslations("Settings.appearance");
+  return (
+    <button
+      type="button"
+      role="radio"
+      onClick={onPick}
+      aria-checked={isActive}
+      aria-label={t("useFont", { name })}
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border glass-card p-4 text-left transition-colors",
+        isActive
+          ? "border-primary/60 ring-2 ring-primary/40"
+          : "border-border hover:border-border hover:bg-muted/40",
+      )}
+      style={{ fontFamily: family }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-lg font-bold text-foreground">{name}</span>
+        {isActive && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
+            <Check className="h-3 w-3" />
+            {t("active")}
+          </span>
+        )}
+      </div>
+      <div className="text-sm leading-snug text-foreground">{sample}</div>
+      <div className="text-xs leading-relaxed text-muted-foreground">
+        {tagline}
+      </div>
+      <span className="sr-only">Font id: {id}</span>
     </button>
   );
 }
@@ -145,7 +223,7 @@ function ThemeCard({
       aria-pressed={isActive}
       aria-label={t("useTheme", { name })}
       className={cn(
-        "flex flex-col gap-3 rounded-lg border bg-card p-4 text-left transition-colors",
+        "flex flex-col gap-3 rounded-lg border glass-card p-4 text-left transition-colors",
         isActive
           ? "border-primary/60 ring-2 ring-primary/40"
           : "border-border hover:border-border hover:bg-muted/40",

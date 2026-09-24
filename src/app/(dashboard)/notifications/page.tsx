@@ -10,6 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 // Icon per notification type. Only one type exists today
 // (conversation_assigned) but this keeps future types a one-line add.
@@ -20,6 +21,7 @@ const TYPE_ICON: Record<Notification["type"], typeof Bell> = {
 export default function NotificationsPage() {
   const router = useRouter();
   const { accountId } = useAuth();
+  const t = useTranslations("Notifications");
   const [notifications, setNotifications] = useState<Notification[] | null>(
     null,
   );
@@ -28,6 +30,7 @@ export default function NotificationsPage() {
 
   const load = useCallback(async () => {
     if (!accountId) return;
+    setError(null);
     const supabase = createClient();
     const { data, error: fetchErr } = await supabase
       .from("notifications")
@@ -104,11 +107,11 @@ export default function NotificationsPage() {
         .eq("id", id)
         .is("read_at", null);
       if (updateErr) {
-        toast.error("Failed to mark notification as read");
+        toast.error(t("markReadError"));
         load();
       }
     },
-    [load],
+    [load, t],
   );
 
   const handleClick = useCallback(
@@ -137,17 +140,17 @@ export default function NotificationsPage() {
       .is("read_at", null);
     setMarkingAll(false);
     if (updateErr) {
-      toast.error("Failed to mark all as read");
+      toast.error(t("markAllError"));
       load();
     }
-  }, [unreadIds.length, load]);
+  }, [unreadIds.length, load, t]);
 
   if (error) {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-2">
         <p className="text-sm text-destructive">{error}</p>
-        <Button variant="outline" onClick={() => window.location.reload()}>
-          Retry
+        <Button variant="outline" onClick={() => void load()}>
+          {t("retry")}
         </Button>
       </div>
     );
@@ -165,9 +168,9 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Conversations other teammates assign to you show up here.
+            {t("description")}
           </p>
         </div>
         <Button
@@ -181,7 +184,7 @@ export default function NotificationsPage() {
           ) : (
             <CheckCheck className="h-4 w-4" />
           )}
-          Mark all as read
+          {t("markAllRead")}
         </Button>
       </div>
 
@@ -191,11 +194,10 @@ export default function NotificationsPage() {
             <Bell className="h-6 w-6 text-primary" />
           </div>
           <p className="mt-3 text-sm font-medium text-foreground">
-            No notifications yet
+            {t("noNotifications")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            You&apos;ll see an alert here when someone assigns you a
-            conversation.
+            {t("noNotificationsHint")}
           </p>
         </div>
       ) : (
@@ -212,7 +214,7 @@ export default function NotificationsPage() {
                     "flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-colors",
                     isUnread
                       ? "border-primary/30 bg-primary/5 hover:border-primary/50"
-                      : "border-border bg-card hover:border-border/70",
+                      : "border-border glass-card hover:border-border/70",
                   )}
                 >
                   <div
@@ -241,7 +243,7 @@ export default function NotificationsPage() {
                       </span>
                       {isUnread && (
                         <span
-                          aria-label="Unread"
+                          aria-label={t("unread")}
                           className="h-2 w-2 flex-shrink-0 rounded-full bg-primary"
                         />
                       )}

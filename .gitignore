@@ -12,6 +12,15 @@
 
 # testing
 /coverage
+/e2e/.auth/
+/playwright-report/
+/test-results/
+
+# runtime log from dev server
+/dev.log
+
+# supabase cli cache
+/supabase/.temp/
 
 # next.js
 /.next/

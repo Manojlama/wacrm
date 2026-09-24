@@ -38,7 +38,8 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Profile",
     "menuSettings": "Settings",
-    "menuSignOut": "Sign out"
+    "menuSignOut": "Sign out",
+    "billing": "Billing & plan"
   },
   "Header": {
     "dashboard": "Dashboard",
@@ -55,10 +56,23 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Profile",
     "menuSettings": "Settings",
-    "menuSignOut": "Sign out"
+    "menuSignOut": "Sign out",
+    "unreadMessages": "{count} unread messages",
+    "unreadNotifications": "{count} unread notifications"
   },
   "ModeToggle": {
     "switchMode": "Switch to {mode} mode"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "description": "Conversations other teammates assign to you show up here.",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "noNotificationsHint": "You'll see an alert here when someone assigns you a conversation.",
+    "retry": "Retry",
+    "markReadError": "Failed to mark notification as read",
+    "markAllError": "Failed to mark all as read",
+    "unread": "Unread"
   },
   "AccountAccess": {
     "unlinkedTitle": "This user is not linked to an account",
@@ -78,7 +92,9 @@
       "newTodayVsYesterday": "new today vs yesterday",
       "vsYesterday": "vs yesterday",
       "openDeals": "{count} open {count, plural, =1 {deal} other {deals}}",
-      "noChange": "No change {suffix}"
+      "noChange": "No change {suffix}",
+      "loadFailed": "Some analytics couldn't load.",
+      "retry": "Retry"
     },
     "quickActions": {
       "newContact": "New Contact",
@@ -147,7 +163,14 @@
       "company": "Company",
       "allCompanies": "All companies",
       "clearAll": "Clear all",
+      "clearFilters": "Clear filters",
+      "live": "Live",
+      "reconnecting": "Reconnecting…",
+      "loadFailed": "Couldn't load conversations",
+      "retry": "Retry",
       "noConversations": "No conversations found",
+      "noConversationsYet": "No conversations yet",
+      "noConversationsMatch": "No conversations match your search or filters",
       "noMessagesYet": "No messages yet",
       "unknown": "Unknown"
     },
@@ -168,6 +191,8 @@
       "unassign": "Unassign",
       "noTeammates": "No teammates available",
       "me": " (me)",
+      "loadFailed": "Couldn't load messages",
+      "retry": "Retry",
       "noMessagesYet": "No messages yet",
       "sendTemplateHint": "Send a template to start the conversation",
       "selectConversation": "Select a conversation",
@@ -341,7 +366,9 @@
       "toastFailedDelete": "Failed to delete contact",
       "toastDeleted": "Contact deleted",
       "toastBulkFailedDelete": "Failed to delete contacts",
-      "toastBulkDeleted": "{count} contacts deleted"
+      "toastBulkDeleted": "{count} contacts deleted",
+      "loadFailed": "Couldn't load contacts",
+      "retry": "Retry"
     },
     "form": {
       "addTitle": "Add Contact",
@@ -384,9 +411,9 @@
         "custom": "Custom Fields",
         "deals": "Deals",
         "tags": "Tags",
-      "noTags": "No tags",
-      "noDeals": "No deals",
-      "addNotePlaceholder": "Add a note..."
+        "noTags": "No tags",
+        "noDeals": "No deals",
+        "addNotePlaceholder": "Add a note..."
       },
       "actions": {
         "edit": "Edit",
@@ -1027,6 +1054,8 @@
       "createError": "Couldn't create flow.",
       "cloneError": "Clone failed",
       "deleteConfirm": "Delete \"{name}\"? Any active runs will end immediately.",
+      "deleteTitle": "Delete flow",
+      "deleteDesc": "Delete \"{name}\"? Any active runs will end immediately.",
       "deleteSuccess": "Flow deleted.",
       "deleteError": "Couldn't delete flow.",
       "emptyTitle": "No flows yet",
@@ -1369,13 +1398,11 @@
       "deleteLocallyAria": "Delete template locally",
       "deleteMetaLocallyTitle": "Delete from Meta and locally",
       "deleteLocallyTitle": "Delete locally",
-      
       "dialogEditTitle": "Edit Message Template",
       "dialogNewTitle": "New Message Template",
       "dialogEditDesc": "Save your changes to re-submit to Meta. Status will flip back to PENDING during review.",
       "dialogNewDesc": "Build a template and submit it to Meta for approval. Once approved, you can use it in broadcasts and the inbox.",
       "authWarning": "AUTHENTICATION templates have a fixed body + OTP button shape that needs a different builder. Create them in Meta WhatsApp Manager for now and use <bold>Sync from Meta</bold> to bring them in.",
-      
       "templateName": "Template Name",
       "namePlaceholder": "e.g. order_confirmation",
       "nameFixed": "Name is fixed once a template exists on Meta — create a new template to change it.",
@@ -1384,7 +1411,6 @@
       "language": "Language",
       "langFixed": "Language is fixed once a template exists on Meta.",
       "langHint": "Must match the exact code on Meta — <code>en_US</code> and <code>en</code> are distinct.",
-      
       "header": "Header",
       "headerNone": "None",
       "headerText": "Text",
@@ -1394,7 +1420,6 @@
       "headerTextPlaceholder": "Header text (max 60 chars, optional {{1}})",
       "headerSampleAria": "Sample value for header variable",
       "headerSamplePlaceholder": "Sample value for {{1}} (required for Meta review)",
-      
       "uploadImage": "Upload image",
       "uploadHint": "JPEG or PNG, ≤5 MB",
       "mediaUrlPlaceholder": "https://… (or paste a public {format} link)",
@@ -1402,17 +1427,14 @@
       "mediaHint": "Must be a publicly accessible HTTPS link. Meta fetches it once during review, so it needs to stay live for ~24 hrs.",
       "videoHint": " Recommended: MP4 / 3GPP, ≤16 MB, ≤60 seconds.",
       "documentHint": " Recommended: PDF, ≤100 MB.",
-      
       "bodyText": "Body Text",
       "bodyPlaceholder": "Hello {{1}}, your order {{2}} is confirmed.",
       "bodyHint": "Use {{1}}, {{2}} for variables (must be contiguous starting at {{1}}).",
       "sampleValues": "Sample values (Meta uses these to review your template)",
       "sampleAria": "Sample value for body variable {var}",
       "samplePlaceholder": "Sample for {var}",
-      
       "footer": "Footer (optional)",
       "footerPlaceholder": "Optional footer text (max 60 chars)",
-      
       "buttons": "Buttons (optional)",
       "addButton": "Add Button",
       "buttonsLimit": "Up to {max} buttons. QUICK_REPLY buttons must come before URL / phone / copy-code buttons.",
@@ -1425,19 +1447,16 @@
       "urlSamplePlaceholder": "Example value for {{1}} (required when URL has a variable)",
       "phonePlaceholder": "+15551234567",
       "codePlaceholder": "Example code (e.g. SUMMER20)",
-      
       "cancel": "Cancel",
       "saving": "Saving…",
       "submitting": "Submitting…",
       "saveResubmit": "Save & Resubmit",
       "submitApproval": "Submit for Approval",
-      
       "deleteDialogTitle": "Delete template?",
       "deleteMetaDesc": "\"{name}\" will be deleted from Meta and from wacrm. Active broadcasts using this template will start failing on their next send. This can't be undone.",
       "deleteLocalDesc": "\"{name}\" will be deleted from wacrm. It was never submitted to Meta, so no remote cleanup is needed.",
       "deleting": "Deleting…",
       "delete": "Delete",
-      
       "toastLoadFailed": "Failed to load templates",
       "toastSubmitFailed": "Failed to submit",
       "toastSubmitEditSuccess": "Edit submitted — Meta typically reviews within 24 hours.",
@@ -1583,7 +1602,6 @@
       "profileSaved": "Profile saved",
       "emailChangeFailed": "Email change failed: {message}",
       "profileSavedEmailCheck": "Profile saved — check your email to confirm the address change",
-      
       "passwordTitle": "Password",
       "passwordDesc": "Use at least {min} characters. You will stay signed in on this device after changing it.",
       "currentPassword": "Current password",
@@ -1597,7 +1615,6 @@
       "currentPasswordIncorrect": "Current password is incorrect",
       "passwordUpdateFailed": "Password update failed: {message}",
       "passwordUpdated": "Password updated",
-      
       "sessionsTitle": "Active sessions",
       "sessionsDesc": "Sign out of every device where you're logged in — including this one. Useful if you lost a laptop or shared your password.",
       "signOutAll": "Sign out of all devices",
@@ -1610,10 +1627,12 @@
     },
     "appearance": {
       "title": "Appearance",
-      "description": "Set the mode and accent colour used across the app. Saved to this device — try it, it changes live.",
+      "description": "Set the mode, UI font and accent colour used across the app. Saved to this device — try it, it changes live.",
       "mode": "Mode",
       "useMode": "Use {mode} mode",
       "active": "Active",
+      "font": "Font",
+      "useFont": "Use {name} font",
       "accentColor": "Accent color",
       "useTheme": "Use {name} theme"
     },
@@ -1738,5 +1757,69 @@
       "reindexTooltip": "Re-embed all documents (e.g. after adding an embeddings key)",
       "loading": "Loading…"
     }
+  },
+  "Billing": {
+    "pageTitle": "Billing & plan",
+    "pageDesc": "Manage your subscription, usage limits, and invoices.",
+    "loading": "Loading your billing details…",
+    "loadFailed": "We couldn't load your billing details. Please refresh and try again.",
+    "actionFailed": "That action failed. Please try again.",
+    "noPlan": "No plan yet",
+    "trialEnds": "Trial ends",
+    "renewsOn": "Renews on",
+    "cancelsAtEnd": "Cancels at end of period",
+    "cancelsAtEndDesc": "Your subscription is set to cancel when the current period ends. You can keep using WACRM until then.",
+    "payNow": "Pay now",
+    "reactivate": "Reactivate subscription",
+    "cancelPlan": "Cancel subscription",
+    "cancelTrial": "Cancel trial",
+    "ownerOnly": "Only the workspace owner can manage billing.",
+    "usageTitle": "Usage this period",
+    "usageDesc": "How much of your plan’s included limits you are using.",
+    "usageUnavailable": "Usage details aren’t available right now.",
+    "invoicesTitle": "Invoices",
+    "noInvoices": "No invoices yet.",
+    "invoiceDate": "Date",
+    "invoiceAmount": "Amount",
+    "invoiceStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "billedTo": "Billed to {name}",
+    "status": {
+      "trialing": "Trial",
+      "active": "Active",
+      "past_due": "Past due",
+      "grace_period": "Grace period",
+      "suspended": "Suspended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "metric": {
+      "agents": "Team members",
+      "contacts": "Contacts",
+      "broadcasts": "Broadcasts",
+      "automations": "Automations",
+      "whatsapp_numbers": "WhatsApp numbers"
+    },
+    "plansTitle": "Plans",
+    "plansDesc": "Switch plans anytime. Changes take effect on your next billing cycle for payment purposes; limits update immediately.",
+    "currentPlan": "Current plan",
+    "perMonth": "mo",
+    "featureContacts": "{n} contacts",
+    "featureAgents": "{n} team members",
+    "featureAi": "AI assistant: {enabled}",
+    "yes": "on",
+    "no": "off",
+    "yourPlan": "Your plan",
+    "switchTo": "Switch to this plan",
+    "gatewayTitle": "Payment gateway",
+    "gatewayDesc": "Choose which provider bills this workspace. Payments for future charges go through the selected gateway.",
+    "gatewayActive": "Active",
+    "gatewayNotConfigured": "Not configured",
+    "gatewayNotLive": "Payment is disabled until the payment gateway is configured — add its API keys in the server environment, or ask your administrator.",
+    "gatewayOwnerOnly": "Payments are billed through {provider}. Only the workspace owner can change the gateway."
   }
 }

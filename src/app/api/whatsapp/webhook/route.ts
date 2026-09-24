@@ -1,7 +1,7 @@
 import { NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { decrypt, encrypt, isLegacyFormat } from '@/lib/whatsapp/encryption'
-import { getMediaUrl, downloadMedia } from '@/lib/whatsapp/meta-api'
+import { getMediaUrl } from '@/lib/whatsapp/meta-api'
 import { mirrorInboundMedia } from '@/lib/whatsapp/mirror-inbound-media'
 import { normalizePhone } from '@/lib/whatsapp/phone-utils'
 import { findExistingContact, isUniqueViolation } from '@/lib/contacts/dedupe'
@@ -1164,6 +1164,19 @@ async function findOrCreateContact(
     if (isUniqueViolation(createError)) {
       const raced = await findExistingContact(supabaseAdmin(), accountId, phone)
       if (raced) return { contact: raced, wasCreated: false }
+    }
+    if (
+      typeof createError.message === 'string' &&
+      createError.message.includes('USAGE_LIMIT_REACHED')
+    ) {
+      // The account is at its plan's contact cap (migration 041 trigger).
+      // The message can't be stored without a contact row — drop it, but
+      // make sure the operator can see this is a plan-limit denial and
+      // not a transient webhook error.
+      console.error(
+        `[webhook] inbound message dropped for ${accountId}: contact cap reached`,
+      )
+      return null
     }
     console.error('Error creating contact:', createError)
     return null
