@@ -18,6 +18,7 @@
 
 # runtime log from dev server
 /dev.log
+/dev.err.log
 
 # supabase cli cache
 /supabase/.temp/
